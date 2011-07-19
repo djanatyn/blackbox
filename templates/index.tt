@@ -1,0 +1,22 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css" />
+  <link href='http://fonts.googleapis.com/css?family=Varela&v2' rel='stylesheet' type='text/css'>
+  <title>a blog</title>
+</head>
+<body>
+  <h1>djanatyn's blog</h1>
+  <div id="content">
+    [% content %]
+  <footer>
+    <p>powered by perl, Template::Toolkit, and emacs.</p>
+  </footer>
+
+  </div>
+  <div id="contact">
+    <ul>
+      [% links %]
+    </ul>
+  </div>
+</body>
+</html>
