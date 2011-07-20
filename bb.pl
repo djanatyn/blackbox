@@ -7,41 +7,29 @@ my $tt = Template->new(
     INCLUDE_PATH => './templates',
 });
 
-my $title = 'a blog post';
-my $content;
+sub returnHash {
+    my ($self) = @_;
+    my %$self;
+
+    open(TEXT, "$self") or die "can't open $self";
+    ($$self{title}, $$self{date}, my @rest) = <TEXT>;
+    close TEXT;
+
+    for $_ (@rest) { $$self{text} .= $_; }
+
+    return %$self;
+}
 
 my @filenames = glob './input/*';
-@filenames = sort @filenames;
+for my $file (@filenames) { %$file = returnHash($file); }
 
-my @categories;
-
-sub getInfo {
-    my ($filename) = @_;
-    my @info;
-
-    open(TEXT, "$filename") or die "can't open $filename";
-    $info[0] = <TEXT>; $info[1] = <TEXT>; my $text;
-    my @lines = <TEXT>; close TEXT;
-
-    for $_ (@lines) { $info[2] .= $_; }
-
-    return @info;
+my $indexPosts; for my $file (@filenames[0..2]) {
+    $indexPosts .= "<h2>$$file{title} - $$file{date}</h2><hr />$$file{text}<br />\n";
 }
-
-my $firstThree;
-for my $three (@filenames[0..2]) {
-    my @info = getInfo($three);
-    $firstThree .= "<h2>$info[0] - $info[1]</h2><hr />$info[2]<br />\n";
-}
-
-my $links;
-for my $file (@filenames) { my @info = getInfo($file); push @categories, $info[0]; }
-
-for my $category (@categories) { $links .= "<li><a href='$category'>$category</a></li>\n"; }
 
 my $vars = {
-    content => "$firstThree",
-    links => "$links",
+    content => "$indexPosts",
+    links => "hello world",
 };
 
 $tt->process('index.tt', $vars, './output/index.html');
