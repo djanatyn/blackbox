@@ -7,24 +7,25 @@ my $tt = Template->new(
     INCLUDE_PATH => './templates',
 });
 
+# sub returnHash
+# when given a filename, this subroutine creates a hash for that file and fills 
 sub returnHash {
-    my ($self) = @_;
-    my %$self;
+    my ($self) = @_; my %self;
 
     open(TEXT, "$self") or die "can't open $self";
-    ($$self{title}, $$self{date}, my @rest) = <TEXT>;
+    ($self{title}, $self{date}, my @rest) = <TEXT>;
     close TEXT;
 
-    for $_ (@rest) { $$self{text} .= $_; }
+    for $_ (@rest) { $self{text} .= $_; }
 
-    return %$self;
+    return %self;
 }
 
-my @filenames = glob './input/*';
-for my $file (@filenames) { %$file = returnHash($file); }
+my @filenames = glob './input/*'; my %files;
+for my $file (@filenames) { $files{%$file} = returnHash($file); }
 
 my $indexPosts; for my $file (@filenames[0..2]) {
-    $indexPosts .= "<h2>$$file{title} - $$file{date}</h2><hr />$$file{text}<br />\n";
+    $indexPosts .= "<h2>$files{$file}{title} - $files{$file}{date}</h2><hr />$files{$file}{text}<br />\n";
 }
 
 my $vars = {
