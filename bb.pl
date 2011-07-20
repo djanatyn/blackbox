@@ -8,7 +8,8 @@ my $tt = Template->new(
 });
 
 sub returnHash {
-    my ($self) = @_; my %self;
+    my ($self) = @_;
+    my %self;
 
     open(TEXT, "$self") or die "can't open $self";
     ($self{title}, $self{date}, my @rest) = <TEXT>;
@@ -19,10 +20,13 @@ sub returnHash {
     return %self;
 }
 
-my @filenames = glob './input/*'; my %files;
+my @filenames = glob './input/*';
+my %files;
+
 for my $file (@filenames) { $files{%$file} = returnHash($file); }
 
-my $indexPosts; for my $file (@filenames[0..2]) {
+my $indexPosts;
+for my $file (@filenames[0..2]) {
     $indexPosts .= "<h2>$files{$file}{title} - $files{$file}{date}</h2><hr />$files{$file}{text}<br />\n";
 }
 
