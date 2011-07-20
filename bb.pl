@@ -7,8 +7,6 @@ my $tt = Template->new(
     INCLUDE_PATH => './templates',
 });
 
-# sub returnHash
-# when given a filename, this subroutine creates a hash for that file and fills 
 sub returnHash {
     my ($self) = @_; my %self;
 
@@ -16,7 +14,7 @@ sub returnHash {
     ($self{title}, $self{date}, my @rest) = <TEXT>;
     close TEXT;
 
-    for $_ (@rest) { $self{text} .= $_; }
+    $self{text} = join('', @rest);
 
     return %self;
 }
