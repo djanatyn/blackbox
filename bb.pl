@@ -46,7 +46,6 @@ my @tags;
 for my $entry (@entries) { push @tags, $$entry{tag}; }
 my %seen = ();
 my @taglist = grep { ! $seen{ $_ }++ } @tags;
-for (@taglist) { print; }
 # generate the links
 my $links;
 for my $tag (@taglist) { $links .= "<li><a href='$tag.html'>$tag</a></li>\n"; }
@@ -71,7 +70,6 @@ for my $entry (@entries)
     my $content  = "<h2>$$entry{title} - $$entry{date}</h2><hr />$$entry{text}<br />\n";
     $index  .= "<h2><a href='$$entry{name}.html'>$$entry{title}</a> - $$entry{date}</h2><hr />$$entry{text}<br />\n";
     my $page = "$$entry{title}";
-    my $links = '';
 
     my $vars = {
 	page    => $page,
