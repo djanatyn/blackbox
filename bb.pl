@@ -18,6 +18,7 @@ sub new {
     my $text = join('', <$fh>);
 
     $file =~ s/.+input\///;
+    chomp($tag);
 
     my $self = {
 	title => $title,
@@ -40,6 +41,30 @@ my $tt = Template->new(
 my @filenames = glob './input/*';
 my @entries = map { Entry->new($_) } @filenames;
 
+# generate a list of tags, with no duplicates
+my @tags;
+for my $entry (@entries) { push @tags, $$entry{tag}; }
+my %seen = ();
+my @taglist = grep { ! $seen{ $_ }++ } @tags;
+for (@taglist) { print; }
+# generate the links
+my $links;
+for my $tag (@taglist) { $links .= "<li><a href='$tag.html'>$tag</a></li>\n"; }
+# create a page for each tag
+for my $tag (@taglist) {
+    my $content;
+    for my $entry (@entries) {
+	if ($$entry{tag} eq $tag) { $content .= "<h2><a href='$$entry{name}.html'>$$entry{title}</a> - $$entry{date}</h2><hr />$$entry{text}<br />\n"; }
+    };
+    
+    my $vars = {
+	page    => $tag,
+	content => $content,
+	links   => $links,
+    };
+    $tt->process('index.tt', $vars, "./output/$tag.html");
+}
+
 my $index;
 for my $entry (@entries)
 {
@@ -60,7 +85,7 @@ for my $entry (@entries)
 my $vars = {
     page    => 'home',
     content => $index,
-    links   => '',
+    links   => $links,
 };
 
 $tt->process('index.tt', $vars, "./output/index.html");
