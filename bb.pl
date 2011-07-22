@@ -6,70 +6,61 @@ use Template;
 use IO::File;
 use autodie;
 
+package Entry;
+
+sub new {
+    my ($pkg, $file) = @_;
+    my $fh = IO::File->new($file, 'r');
+
+    my $title = <$fh>;
+    my $date = <$fh>;
+    my $tag = <$fh>;
+    my $text = join('', <$fh>);
+
+    $file =~ s/.+input\///;
+
+    my $self = {
+	title => $title,
+        date  => $date,
+	tag   => $tag,
+	text  => $text,
+	name  => $file,
+    };
+    bless $self, $pkg;
+    return $self;
+}
+
+package main;
+
 my $tt = Template->new(
 {
     INCLUDE_PATH => './templates',
 });
 
-# sub parseFile($filename)
-# returns a list of title, date, and text
-sub parseFile {
-    my ($filename) = @_;
-    my %data;
-
-    my $fh = IO::File->new($filename, 'r');
-    $data{'title'} = <$fh>;
-    $data{'date'} = <$fh>;
-    $data{'tag'} = <$fh>;
-    $data{'text'} = join('', <$fh>);
-
-    return $data{'title'}, $data{'date'}, $data{'tag'}, $data{'text'};
-}
-
 my @filenames = glob './input/*';
-#my %files = map { $_ => parseFile($_) } @filenames;
+my @entries = map { Entry->new($_) } @filenames;
 
-my $indexPosts;
-my $links;
-my %tags;
-for my $file (@filenames[0..2]) {
-    my ($title, $date, $tag, $text) = parseFile($file);
-    my $name = $file;
-    $name =~ s/.+input\///;
-    $indexPosts .= "<h2><a href='$name.html'>$title</a> - $date</h2><hr />$text<br />\n";
-}
+my $index;
+for my $entry (@entries)
+{
+    my $content  = "<h2>$$entry{title} - $$entry{date}</h2><hr />$$entry{text}<br />\n";
+    $index  .= "<h2><a href='$$entry{name}.html'>$$entry{title}</a> - $$entry{date}</h2><hr />$$entry{text}<br />\n";
+    my $page = "$$entry{title}";
+    my $links = '';
 
-for my $file (@filenames) {
-    my ($title, $date, $tag, $text) = parseFile($file);
-    chomp($tag);
-    
-    my $localvars = {
-	page => $title,
-	content => "<h2>$title - $date</h2><hr />$text<br />\n",
-	links => $links,
-    };
-    $file =~ s/.+input\///;
-    $tags{$tag} .= "<h2>$title - $date</h2><hr />$text<br />\n";
-    $tt->process('index.tt', $localvars, "./output/$file.html");
-}
-while ((my $tag, my $content) = each %tags) {
-    $links .= "<li><a href='$tag.html'>$tag</a></li>\n"
-}
-
-while ((my $tag, my $content) = each %tags) {
     my $vars = {
-	page => $tag,
+	page    => $page,
 	content => $content,
-	links => $links,
+	links   => $links,
     };
-    $tt->process('index.tt', $vars, "./output/$tag.html");
+
+    $tt->process('index.tt', $vars, "./output/$$entry{name}.html");
 }
 
 my $vars = {
-    page => "home",
-    content => $indexPosts,
-    links => $links,
+    page    => 'home',
+    content => $index,
+    links   => '',
 };
 
-$tt->process('index.tt', $vars, './output/index.html');
-
+$tt->process('index.tt', $vars, "./output/index.html");
